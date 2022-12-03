@@ -1,0 +1,84 @@
+
+paths:
+  /panel/blog/{userId}:
+    post:
+      summary: Summary
+      description: Create a blog
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The ID of the user to return.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                summary:
+                  type: string
+                author:
+                  type: string
+                content:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
+                cover:
+                  type: object
+                  properties:
+                    format:
+                      type: string
+                    data:
+                      type: string
+                      format: binary
+              required:
+                - title
+                - summary
+                - author
+                - content
+                - tags
+
+      responses:
+        200:
+          description: A blog object.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  summary:
+                    type: string
+                  author:
+                    type: string
+                  content:
+                    type: string
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                  cover:
+                    type: string
+        401:
+          description: Not authorized
+        400:
+          description: The title is taken
+        500:
+          description: Internal server error
+
+components:
+  securitySchemes:
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT    # optional, arbitrary value for documentation purposes
