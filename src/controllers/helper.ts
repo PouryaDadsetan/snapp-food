@@ -17,11 +17,10 @@ interface IHandleRequestOptions {
   res: Response,
   validationSchema?: yup.AnyObjectSchema,
   queryValidationSchema?: yup.AnyObjectSchema,
-  handle: () => Promise<IResponse>,
-  extractOutput?: (outputs: object) => object,
+  handle: () => Promise<IResponse>
 }
 
-export async function handleRequest({ req, res, validationSchema, handle, extractOutput, queryValidationSchema }: IHandleRequestOptions) {
+export async function handleRequest({ req, res, validationSchema, handle, queryValidationSchema }: IHandleRequestOptions) {
 	if(validationSchema) {
 		try {
 			validationSchema.validateSync(req.body)
@@ -44,8 +43,8 @@ export async function handleRequest({ req, res, validationSchema, handle, extrac
 			res.status(result.error?.statusCode || statusCodes.ise).send({ message: result.error?.message })
 			return
 		} else {
-			if(extractOutput && result.outputs) {
-				res.status(statusCodes.ok).send(extractOutput(result.outputs))
+			if(result.outputs) {
+				res.status(statusCodes.ok).send(result.outputs)
 			} else {
 				res.sendStatus(statusCodes.ok)
 			}

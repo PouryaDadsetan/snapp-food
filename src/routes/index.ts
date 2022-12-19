@@ -1,11 +1,11 @@
 import { Router } from 'express'
 
-import { panelAdminRouter } from '../controllers/admin'
-import { websiteUserRouter } from '../controllers/user'
+import { adminRouter } from '../controllers/admin'
+import { userRouter } from '../controllers/user'
 
 const mainRouter = Router()
 
-mainRouter.use('/panel/admin', panelAdminRouter)
-mainRouter.use('/website/user', websiteUserRouter)
+mainRouter.use('/admin', adminRouter)
+mainRouter.use('/user', userRouter)
 
 export default mainRouter

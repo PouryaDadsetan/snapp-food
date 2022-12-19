@@ -8,19 +8,17 @@ import userService from "../../db/models/user/user.service"
 const login = async (req: Request, res: Response) => {
 
   const validationSchema = yup.object().shape({
-    phone: yup.string().required(),
-    code: yup.string().required(),
+    email: yup.string().email().required(),
+    password: yup.string().required(),
   })
 
 	const handle = async () => {
-    const { phone, code } = req.body
+    const { email, password } = req.body
 
-		return await userService.login(phone, code)
+		return await userService.login(email, password)
 	}
 
-	const extractOutput = (outputs: object) => outputs
-
-	return handleRequest({ req, res, validationSchema, handle, extractOutput })
+	return handleRequest({ req, res, validationSchema, handle })
 }
 
 export default login

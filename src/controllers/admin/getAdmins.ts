@@ -30,9 +30,7 @@ const getAdmins = async (req: Request, res: Response) => {
 		return await adminService.getAdmins(options)
 	}
 
-	const extractOutput = (outputs: object) => outputs
-
-	return handleRequest({ req, res, queryValidationSchema, handle, extractOutput })
+	return handleRequest({ req, res, queryValidationSchema, handle })
 }
 
 export default getAdmins

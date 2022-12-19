@@ -3,54 +3,40 @@ import mongoose, { Schema, Document, ObjectId as objectId } from "mongoose"
 const ObjectId = mongoose.Types.ObjectId
 
 export interface IUser extends Document {
-  phone: string
-  loginCode: {
-    code: string
-    expiresAt: number
-  }
   name: string
   email: string
+  phone: string
+  password: string
   addresses: string[]
-  favoriteProducts: objectId[],
-  tokens: string[]
+  isVerified: boolean
   createdAt: Date
   updatedAt: Date
 }
 
 const userSchema = new Schema<IUser>({
-  phone: {
+  name: { 
+    type: String
+  },
+  email: {
     type: String,
     unique: true,
     required: true
   },
-  loginCode: {
-    code: {
-      type: String,
-      default: ""
-    },
-    expiresAt: {
-      type: Number,
-      default: 0
-    }
-  },
-  name: { 
+  phone: {
     type: String
   },
-  email: { 
-    type: String
+  password: { 
+    type: String,
+    required: true
   },
-  favoriteProducts: [{
-    _id: false,
-    type: ObjectId,
-    ref: 'Product'
-  }],
   addresses: [{
     type: String
   }],
-  tokens: [{
-    type: String,
-    default: []
-  }]
+  isVerified: {
+    type: Boolean,
+    required: true,
+    default: false
+  }
 }, {
   timestamps: true
 })
@@ -60,16 +46,15 @@ userSchema.methods.toJSON = function() {
   const userObject = user.toObject()
 
   // Converting timestamps to unix time
-  if(userObject.createAt) {
-    userObject.createdAt = Math.floor(new Date(userObject.createdAt).getTime() / 1000)
-  }
-  if(userObject.updatedAt) {
-    userObject.updatedAt = Math.floor(new Date(userObject.updatedAt).getTime() / 1000)
-  }
+  // if(userObject.createAt) {
+  //   userObject.createdAt = Math.floor(new Date(userObject.createdAt).getTime() / 1000)
+  // }
+  // if(userObject.updatedAt) {
+  //   userObject.updatedAt = Math.floor(new Date(userObject.updatedAt).getTime() / 1000)
+  // }
 
-  // Deleting user password and tokens list
-  delete userObject.loginCode
-  delete userObject.tokens
+  // Deleting user password
+  delete userObject.password
 
   return userObject
 }

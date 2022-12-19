@@ -2,34 +2,47 @@ import { Router } from 'express'
 
 import auth from "../../middlewares/auth"
 import login from './login'
-import sendLoginCode from './sendLoginCode'
-import logout from './logout'
+import signup from './signup'
 import getCurrentUser from './getCurrentUser'
 import editUser from './editUser'
-import toggleFavoriteProduct from './toggleFavoriteProduct'
-import deleteUser from './logout'
+import changePassword from './changePassword'
+import deleteUser from './deleteUser'
 
-export const websiteUserRouter = Router()
+export const userRouter = Router()
 
+
+/**
+ * @swagger
+ * components:
+ *  securitySchemes:
+ *    userBearerAuth:
+ *      type: http
+ *      scheme: bearer
+ *      bearerFormat: JWT
+ *    adminBearerAuth:
+ *      type: http
+ *      scheme: bearer
+ *      bearerFormat: JWT
+ */
 
 
 /**
  * @swagger
  * tags:
- * - name: User | Website
- *   description: User routes for website
+ * - name: User
+ *   description: User routes
  */
 
 
 
 /**
  * @swagger
- * /website/user/login-code:
+ * /api/user/signup:
  *   post:
  *     tags:
- *       - User | Website
- *     summary: send login code to user phone
- *     description: send login code to user phone (create new user if user doesn't exist)
+ *       - User
+ *     summary: Sign up user
+ *     description: Sign up user
  *     requestBody:
  *       required: true
  *       content:
@@ -37,13 +50,53 @@ export const websiteUserRouter = Router()
  *           schema:
  *             type: object
  *             properties:
- *               phone:
+ *               email:
+ *                 type: string
+ *               password:
  *                 type: string
  *             required:
- *               - phone
+ *               - email
+ *               - password
  *     responses:
  *       200:
- *         description: Login code was sent to the user's phone
+ *         description: Sign up was successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                     phone:
+ *                       type: boolean
+ *                     name:
+ *                       type: boolean
+ *                     email:
+ *                       type: string
+ *                     addresses:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                     isVerified:
+ *                       type: boolean
+ *                     createdAt:
+ *                       type: number
+ *                     updatedAt:
+ *                       type: number
+ *                 token:
+ *                   type: string
+ *       400:
+ *         description: The email is already taken
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
  *       500:
  *         description: Internal server error
  *         content:
@@ -54,16 +107,16 @@ export const websiteUserRouter = Router()
  *                 message:
  *                   type: string
  */
-websiteUserRouter.post('/login-code', sendLoginCode)
+userRouter.post('/signup', signup)
 
 
 
 /**
  * @swagger
- * /website/user/login:
+ * /api/user/login:
  *   post:
  *     tags:
- *       - User | Website
+ *       - User
  *     summary: Login user
  *     description: Login user
  *     requestBody:
@@ -73,13 +126,13 @@ websiteUserRouter.post('/login-code', sendLoginCode)
  *           schema:
  *             type: object
  *             properties:
- *               phone:
+ *               email:
  *                 type: string
- *               code:
+ *               password:
  *                 type: string
  *             required:
- *               - phone
- *               - code
+ *               - email
+ *               - password
  *     responses:
  *       200:
  *         description: Login was successful
@@ -99,85 +152,12 @@ websiteUserRouter.post('/login-code', sendLoginCode)
  *                       type: boolean
  *                     email:
  *                       type: string
- *                     favoriteProducts:
- *                       type: array
- *                       items:
- *                         type: object
- *                         properties:
- *                           _id:
- *                             type: string
- *                           subcategory:
- *                             type: object
- *                             properties:
- *                               _id:
- *                                 type: string
- *                               name:
- *                                 type: string
- *                           factory:
- *                             type: object
- *                             properties:
- *                               _id:
- *                                 type: string
- *                               name:
- *                                 type: string
- *                           name:
- *                             type: string
- *                           urlSlug:
- *                             type: string
- *                           description:
- *                             type: string
- *                           properties:
- *                             type: array
- *                             items:
- *                               type: object
- *                               properties:
- *                                 name:
- *                                   type: string
- *                                 value:
- *                                   type: string
- *                           unit:
- *                             type: string
- *                           price:
- *                             type: number
- *                           priceHistory:
- *                             type: array
- *                             items:
- *                               type: object
- *                               properties:
- *                                 price:
- *                                   type: number
- *                                 date:
- *                                   type: number
- *                           tags:
- *                             type: array
- *                             items:
- *                               type: string
- *                           images:
- *                             type: array
- *                             items:
- *                               type: string
- *                           averageRating:
- *                             type: number
- *                           ratingsCount:
- *                             type: number
- *                           ratings:
- *                             type: array
- *                             items:
- *                               type: object
- *                               properties:
- *                                 user:
- *                                   type: string
- *                                   description: ID of the related user
- *                                 rating:
- *                                   type: number
- *                           createdAt:
- *                             type: number
- *                           updatedAt:
- *                             type: number
  *                     addresses:
  *                       type: array
  *                       items:
  *                         type: string
+ *                     isVerified:
+ *                       type: boolean
  *                     createdAt:
  *                       type: number
  *                     updatedAt:
@@ -203,52 +183,16 @@ websiteUserRouter.post('/login-code', sendLoginCode)
  *                 message:
  *                   type: string
  */
-websiteUserRouter.post('/login', login)
+userRouter.post('/login', login)
 
 
 
 /**
  * @swagger
- * /website/user/logout:
- *   post:
- *     tags:
- *       - User | Website
- *     summary: Logout user
- *     description: Logout user
- *     security:
- *       - userBearerAuth: []
- *     responses:
- *       200:
- *         description: Logout was successful
- *       401:
- *         description: Not Authorized
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- */
-websiteUserRouter.post('/logout', auth('user'), logout)
-
-
-
-/**
- * @swagger
- * /website/user:
+ * /api/user:
  *   get:
  *     tags:
- *       - User | Website
+ *       - User
  *     summary: get current user
  *     description: get current user
  *     security:
@@ -272,85 +216,12 @@ websiteUserRouter.post('/logout', auth('user'), logout)
  *                       type: boolean
  *                     email:
  *                       type: string
- *                     favoriteProducts:
- *                       type: array
- *                       items:
- *                         type: object
- *                         properties:
- *                           _id:
- *                             type: string
- *                           subcategory:
- *                             type: object
- *                             properties:
- *                               _id:
- *                                 type: string
- *                               name:
- *                                 type: string
- *                           factory:
- *                             type: object
- *                             properties:
- *                               _id:
- *                                 type: string
- *                               name:
- *                                 type: string
- *                           name:
- *                             type: string
- *                           urlSlug:
- *                             type: string
- *                           description:
- *                             type: string
- *                           properties:
- *                             type: array
- *                             items:
- *                               type: object
- *                               properties:
- *                                 name:
- *                                   type: string
- *                                 value:
- *                                   type: string
- *                           unit:
- *                             type: string
- *                           price:
- *                             type: number
- *                           priceHistory:
- *                             type: array
- *                             items:
- *                               type: object
- *                               properties:
- *                                 price:
- *                                   type: number
- *                                 date:
- *                                   type: number
- *                           tags:
- *                             type: array
- *                             items:
- *                               type: string
- *                           images:
- *                             type: array
- *                             items:
- *                               type: string
- *                           averageRating:
- *                             type: number
- *                           ratingsCount:
- *                             type: number
- *                           ratings:
- *                             type: array
- *                             items:
- *                               type: object
- *                               properties:
- *                                 user:
- *                                   type: string
- *                                   description: ID of the related user
- *                                 rating:
- *                                   type: number
- *                           createdAt:
- *                             type: number
- *                           updatedAt:
- *                             type: number
  *                     addresses:
  *                       type: array
  *                       items:
  *                         type: string
+ *                     isVerified:
+ *                       type: boolean
  *                     createdAt:
  *                       type: number
  *                     updatedAt:
@@ -374,16 +245,16 @@ websiteUserRouter.post('/logout', auth('user'), logout)
  *                 message:
  *                   type: string
  */
-websiteUserRouter.get('/', auth('user'), getCurrentUser)
+userRouter.get('/', auth('user'), getCurrentUser)
 
 
 
 /**
  * @swagger
- * /website/user:
+ * /api/user:
  *   patch:
  *     tags:
- *       - User | Website
+ *       - User
  *     summary: Edit current user
  *     description: Edit current user
  *     security:
@@ -401,6 +272,8 @@ websiteUserRouter.get('/', auth('user'), getCurrentUser)
  *                   name:
  *                     type: string
  *                   email:
+ *                     type: string
+ *                   phone:
  *                     type: string
  *                   addresses:
  *                     type: array
@@ -425,85 +298,12 @@ websiteUserRouter.get('/', auth('user'), getCurrentUser)
  *                       type: boolean
  *                     email:
  *                       type: string
- *                     favoriteProducts:
- *                       type: array
- *                       items:
- *                         type: object
- *                         properties:
- *                           _id:
- *                             type: string
- *                           subcategory:
- *                             type: object
- *                             properties:
- *                               _id:
- *                                 type: string
- *                               name:
- *                                 type: string
- *                           factory:
- *                             type: object
- *                             properties:
- *                               _id:
- *                                 type: string
- *                               name:
- *                                 type: string
- *                           name:
- *                             type: string
- *                           urlSlug:
- *                             type: string
- *                           description:
- *                             type: string
- *                           properties:
- *                             type: array
- *                             items:
- *                               type: object
- *                               properties:
- *                                 name:
- *                                   type: string
- *                                 value:
- *                                   type: string
- *                           unit:
- *                             type: string
- *                           price:
- *                             type: number
- *                           priceHistory:
- *                             type: array
- *                             items:
- *                               type: object
- *                               properties:
- *                                 price:
- *                                   type: number
- *                                 date:
- *                                   type: number
- *                           tags:
- *                             type: array
- *                             items:
- *                               type: string
- *                           images:
- *                             type: array
- *                             items:
- *                               type: string
- *                           averageRating:
- *                             type: number
- *                           ratingsCount:
- *                             type: number
- *                           ratings:
- *                             type: array
- *                             items:
- *                               type: object
- *                               properties:
- *                                 user:
- *                                   type: string
- *                                   description: ID of the related user
- *                                 rating:
- *                                   type: number
- *                           createdAt:
- *                             type: number
- *                           updatedAt:
- *                             type: number
  *                     addresses:
  *                       type: array
  *                       items:
  *                         type: string
+ *                     isVerified:
+ *                       type: boolean
  *                     createdAt:
  *                       type: number
  *                     updatedAt:
@@ -554,18 +354,18 @@ websiteUserRouter.get('/', auth('user'), getCurrentUser)
  *                 message:
  *                   type: string
  */
-websiteUserRouter.patch('/', auth('user'), editUser)
+userRouter.patch('/', auth('user'), editUser)
 
 
 
 /**
  * @swagger
- * /website/user/favorite/toggle:
+ * /api/user/change_password:
  *   post:
  *     tags:
- *       - User | Website
- *     summary: Add or remove a favorite product
- *     description: Add or remove a favorite product
+ *       - User
+ *     summary: Change user password
+ *     description: Change user password
  *     security:
  *       - userBearerAuth: []
  *     requestBody:
@@ -575,13 +375,52 @@ websiteUserRouter.patch('/', auth('user'), editUser)
  *           schema:
  *             type: object
  *             properties:
- *               productId:
+ *               oldPassword:
+ *                 type: string
+ *               newPassword:
  *                 type: string
  *             required:
- *               - productId
+ *               - oldPassword
+ *               - newPassword
  *     responses:
  *       200:
- *         description: Favorite product toggled successfully
+ *         description: Changing the password was successful
+ *       400:
+ *         description: Incorrect credentials
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
+userRouter.post('/change_password', auth('user'), changePassword)
+
+
+
+/**
+ * @swagger
+ * /api/user:
+ *   delete:
+ *     tags:
+ *       - User
+ *     summary: Delete current user
+ *     description: Delete current user
+ *     security:
+ *       - userBearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User deleting was successful
  *       401:
  *         description: Not authorized 
  *         content:
@@ -601,9 +440,5 @@ websiteUserRouter.patch('/', auth('user'), editUser)
  *                 message:
  *                   type: string
  */
-websiteUserRouter.post('/favorite/toggle', auth('user'), toggleFavoriteProduct)
-
-
-
-websiteUserRouter.delete('/', auth('user'), deleteUser)
+userRouter.delete('/', auth('user'), deleteUser)
 

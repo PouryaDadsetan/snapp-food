@@ -3,19 +3,20 @@ import { Request, Response } from 'express'
 import * as yup from "yup"
 
 import { handleRequest } from '../helper'
-import adminService from "../../db/models/admin/admin.service"
+import userService from "../../db/models/user/user.service"
 
 const changePassword = async (req: Request, res: Response) => {
 
   const validationSchema = yup.object().shape({
-    password: yup.string().required(),
+    oldPassword: yup.string().required(),
+    newPassword: yup.string().required(),
   })
 
 	const handle = async () => {
-    const adminId = res.locals.admin?._id
-    const { password } = req.body
+    const userId = res.locals.user?._id
+    const { oldPassword, newPassword } = req.body
 
-		return await adminService.changePassword(adminId, password)
+		return await userService.changePassword(userId, oldPassword, newPassword)
 	}
 
 	return handleRequest({ req, res, validationSchema, handle })

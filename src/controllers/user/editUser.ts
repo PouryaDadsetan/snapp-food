@@ -10,16 +10,15 @@ const editUser = async (req: Request, res: Response) => {
     updates: yup.object({
       name: yup.string(),
       email: yup.string().email(),
+      phone: yup.string(),
       addresses: yup.array().of(yup.string())
     })
   })
 
 	const handle = async () => {
-
     const userId = res.locals.user._id
 
-    const allowedUpdates = ["name", "email", "addresses"]
-
+    const allowedUpdates = ["name", "email", "phone", "addresses"]
     const updates: { [key: string]: any} = {}
 
     Object.keys(req.body.updates || {}).forEach((update) => {
@@ -31,9 +30,7 @@ const editUser = async (req: Request, res: Response) => {
 		return await userService.editUser(userId, updates)
 	}
 
-	const extractOutput = (outputs: object) => outputs
-
-	return handleRequest({ req, res, validationSchema, handle, extractOutput })
+	return handleRequest({ req, res, validationSchema, handle })
 }
 
 export default editUser

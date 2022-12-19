@@ -3,7 +3,6 @@ import * as yup from "yup"
 
 import { handleRequest } from '../helper'
 import adminService from "../../db/models/admin/admin.service"
-import { permissions } from "../../utils/constants"
 
 const editAdmin = async (req: Request, res: Response) => {
 
@@ -14,7 +13,6 @@ const editAdmin = async (req: Request, res: Response) => {
       password: yup.string(),
       phone: yup.string(),
       name: yup.string(),
-      permissions: yup.array().of(yup.string().oneOf(permissions))
     })
   })
 
@@ -42,9 +40,7 @@ const editAdmin = async (req: Request, res: Response) => {
 		return await adminService.editAdmin(adminId, adminUpdates, currentAdminIsGodAdmin)
 	}
 
-	const extractOutput = (outputs: object) => outputs
-
-	return handleRequest({ req, res, validationSchema, handle, extractOutput })
+	return handleRequest({ req, res, validationSchema, handle })
 }
 
 export default editAdmin

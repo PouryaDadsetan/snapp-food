@@ -13,10 +13,7 @@ const getCurrentUser = async (req: Request, res: Response) => {
 		return await userService.getUser(userId)
 	}
 
-  // TODO: extract the output correctly
-	const extractOutput = (outputs: object) => outputs
-
-	return handleRequest({ req, res, handle, extractOutput })
+	return handleRequest({ req, res, handle })
 }
 
 export default getCurrentUser

@@ -60,11 +60,7 @@ const swaggerUiOptions = {
 }
 server.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecification, swaggerUiOptions))
 
-server.use(mainRouter)
-
-server.get('/', (req, res) => {
-  res.status(200).send()
-})
+server.use('/api', mainRouter)
 
 // Logging errors
 server.use(expressWinston.errorLogger({

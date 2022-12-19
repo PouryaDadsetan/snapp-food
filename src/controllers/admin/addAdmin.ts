@@ -4,7 +4,6 @@ import * as yup from "yup"
 
 import { handleRequest } from '../helper'
 import adminService from "../../db/models/admin/admin.service"
-import { permissions } from "../../utils/constants"
 import { ObjectId  as objectId } from 'mongoose'
 
 const addAdmin = async (req: Request, res: Response) => {
@@ -14,7 +13,6 @@ const addAdmin = async (req: Request, res: Response) => {
     password: yup.string().required(),
     phone: yup.string().required(),
     name: yup.string().required(),
-    permissions: yup.array().of(yup.string().oneOf(permissions))
   })
 
 	const handle = async () => {
@@ -46,7 +44,7 @@ const addAdmin = async (req: Request, res: Response) => {
 
 	const extractOutput = (outputs: object) => outputs
 
-	return handleRequest({ req, res, validationSchema, handle, extractOutput })
+	return handleRequest({ req, res, validationSchema, handle })
 }
 
 export default addAdmin

@@ -1,42 +1,44 @@
 import User, { IUser } from "./user"
-import Product from "../product/product"
 import { IResponse } from "../../../controllers/helper"
 import { statusCodes, errorMessages } from "../../../utils/constants"
 import { generateToken } from "../../../utils/helpers/token"
-import { sendCode } from "../../../utils/helpers/sms"
 import mongoose, { ObjectId as objectId } from "mongoose"
+import { decrypt, encrypt } from "../../../utils/helpers/encryption"
 const ObjectId = mongoose.Types.ObjectId
 
-const sendLoginCode = async (phone: string): Promise<IResponse> => {
+const signup = async (email: string, password: string): Promise<IResponse> => {
   try {
-    const user = await User.findOne({phone}).exec()
-
-    const loginCode = {
-      code: Math.floor(1000 + Math.random() * 9000),
-      expiresAt: new Date().getTime() + 300000
-    }
-
-    if(!user) {
-      // Creating new user
-      const newUser = {
-        phone,
-        loginCode
+    // Checking email availability
+    const existingUserWithThisEmail = await User.findOne({ email }).exec()
+    if(existingUserWithThisEmail) {
+      return {
+        success: false,
+        error: {
+          statusCode: statusCodes.badRequest,
+          message: errorMessages.userService.emailAlreadyTaken
+        }
       }
-      await User.create(newUser)
-
-    } else {
-      // Updating login code of existing user
-      await User.findByIdAndUpdate(user._id, { $set: { loginCode }}).exec()
     }
+    // Creating new user
+    const newUser = {
+      email,
+      password: encrypt(password)
+    }
+    const createdUser = await User.create(newUser)
 
-    await sendCode(phone, loginCode.code)
+    const token = generateToken(createdUser._id, "user")
 
+    // TODO: send activation email
     return {
-      success: true
+      success: true,
+      outputs: {
+        user: createdUser,
+        token
+      }
     }
 
   } catch(error) {
-    console.log('Error while sending login code: ', error)
+    console.log('Error while user sign up: ', error)
 
     return {
       success: false,
@@ -50,58 +52,21 @@ const sendLoginCode = async (phone: string): Promise<IResponse> => {
 
 //------------------------------------------------
 
-const login = async (phone: string, code: string): Promise<IResponse> => {
+const login = async (email: string, password: string): Promise<IResponse> => {
   try {
-    const user = await User.findOne({phone}).exec()
+    const user = await User.findOne({ email }).exec()
 
-    if(!user) {
+    if(!user || password !== decrypt(user.password)) {
       return {
         success: false,
         error: {
-          message: errorMessages.userService.phoneNotFound,
-          statusCode: statusCodes.badRequest
-        }
-      }
-    }
-
-    if(code !== user.loginCode.code) {
-      return {
-        success: false,
-        error: {
-          message: errorMessages.userService.incorrectLoginCode,
-          statusCode: statusCodes.badRequest
-        }
-      }
-    }
-
-    const isTokenExpired = new Date().getTime() > user.loginCode.expiresAt
-
-    if(isTokenExpired) {
-      return {
-        success: false,
-        error: {
-          message: errorMessages.userService.loginCodeExpired,
+          message: errorMessages.userService.incorrectCredentials,
           statusCode: statusCodes.badRequest
         }
       }
     }
 
     const token = generateToken(user._id, "user")
-
-    await User.findByIdAndUpdate(user._id, { $push: { tokens: token }})
-      .populate({
-        path: 'favoriteProducts',
-        populate: [
-          {
-            path: 'subcategory',
-            select: '_id name'
-          },
-          {
-            path: 'factory',
-            select: '_id name'
-          }
-        ]
-      }).exec()
 
     return {
       success: true,
@@ -126,46 +91,33 @@ const login = async (phone: string, code: string): Promise<IResponse> => {
 
 //-----------------------------------------------------------
 
-const logout = async (token: string): Promise<IResponse> => {
-  try {
-    // popping old token from tokens list
-    await User.findOneAndUpdate({ tokens: token }, { $pull: { tokens: token }}).exec()
+// const logout = async (token: string): Promise<IResponse> => {
+//   try {
+//     // popping old token from tokens list
+//     await User.findOneAndUpdate({ tokens: token }, { $pull: { tokens: token }}).exec()
 
-    return {
-      success: true
-    }
+//     return {
+//       success: true
+//     }
 
-  } catch(error) {
-    console.log('Error while logging out: ', error)
+//   } catch(error) {
+//     console.log('Error while logging out: ', error)
 
-    return {
-      success: false,
-      error: {
-        message: errorMessages.shared.ise,
-        statusCode: statusCodes.ise
-      }
-    }
-  }
-}
+//     return {
+//       success: false,
+//       error: {
+//         message: errorMessages.shared.ise,
+//         statusCode: statusCodes.ise
+//       }
+//     }
+//   }
+// }
 
 //--------------------------------------------------
 
 const getUser = async (userId: objectId): Promise<IResponse> => {
   try {
-    const user = await User.findById(userId)
-      .populate({
-        path: 'favoriteProducts',
-        populate: [
-          {
-            path: 'subcategory',
-            select: '_id name'
-          },
-          {
-            path: 'factory',
-            select: '_id name'
-          }
-        ]
-      }).exec()
+    const user = await User.findById(userId).exec()
 
     if(!user) {
       return {
@@ -197,64 +149,6 @@ const getUser = async (userId: objectId): Promise<IResponse> => {
   }
 }
 
-//---------------------------
-
-const toggleFavoriteProduct = async (userId: string, productId: string): Promise<IResponse> => {
-  try {
-    // Make sure the user exists
-    const user = await User.findById(userId).exec()
-    if(!user) {
-      return {
-        success: false,
-        error: {
-          message: errorMessages.shared.notFound,
-          statusCode: statusCodes.notFound
-        }
-      }
-    }
-
-    // Make sure the product exists
-    const product = await Product.findById(productId).exec()
-    if(!product) {
-      return {
-        success: false,
-        error: {
-          message: errorMessages.shared.notFound,
-          statusCode: statusCodes.notFound
-        }
-      }
-    }
-
-    if(!user.favoriteProducts.includes(product._id)) {
-      await User.findByIdAndUpdate(userId, {
-        $push: {
-          favoriteProducts: product._id
-        }
-      }).exec()
-    } else {
-      await User.findByIdAndUpdate(userId, {
-        $pull: {
-          favoriteProducts: product._id
-        }
-      }).exec()
-    }
-
-    return  {
-      success: true
-    }
-  } catch(error) {
-    console.log('Error while adding the favorite product: ', error)
-
-    return {
-      success: false,
-      error: {
-        message: errorMessages.shared.ise,
-        statusCode: statusCodes.ise
-      }
-    }
-  }
-}
-
 //----------------------------------------
 
 const editUser = async (
@@ -262,12 +156,14 @@ const editUser = async (
   updates: {
     name?: string
     email?: string
+    phone?: string
     addresses?: string[]
+    isVerified?: boolean
   }
 ): Promise<IResponse> => {
 
   try {
-    // checking adminUpdates object to not be empty
+    // checking updates object to not be empty
     if(Object.keys(updates).length == 0) {
       return {
         success: false,
@@ -292,21 +188,14 @@ const editUser = async (
         }
       }
     }
+
+    // Setting isVerified to true if phone exists
+    if(updates.phone) {
+      updates.isVerified = true
+    }
     
-    const updatedUser = await User.findByIdAndUpdate(userId, updates, { new: true })
-      .populate({
-        path: 'favoriteProducts',
-        populate: [
-          {
-            path: 'subcategory',
-            select: '_id name'
-          },
-          {
-            path: 'factory',
-            select: '_id name'
-          }
-        ]
-      }).exec()
+    // Updating user
+    const updatedUser = await User.findByIdAndUpdate(userId, updates, { new: true }).exec()
 
     if(!updatedUser) {
       return {
@@ -337,17 +226,51 @@ const editUser = async (
   }
 }
 
-//----------------------------------------
+//---------------------------------------------
 
-const deleteUser = async (userId: string): Promise<IResponse> => {
+const changePassword = async (userId: string, oldPassword: string, newPassword: string): Promise<IResponse> => {
   try {
-    // TODO: delete user orders
-    await User.findByIdAndDelete(userId)
+    // Checking old password to be correct
+    const user = await User.findById(userId).exec()
+    if(!user || oldPassword !== decrypt(user.password)) {
+      return {
+        success: false,
+        error: {
+          message: errorMessages.userService.incorrectPassword,
+          statusCode: statusCodes.badRequest
+        }
+      }
+    }
+    // Updating user password
+    await User.findByIdAndUpdate(userId, { $set: { password: encrypt(newPassword) }}).exec()
 
     return {
       success: true
     }
 
+  } catch(error) {
+    console.log('Error while changing user password: ', error)
+
+    return {
+      success: false,
+      error: {
+        message: errorMessages.shared.ise,
+        statusCode: statusCodes.ise
+      }
+    }
+  }
+}
+
+//----------------------------------------
+
+const deleteUser = async (userId: string): Promise<IResponse> => {
+  try {
+    await User.findByIdAndDelete(userId)
+
+    return {
+      success: true
+    }
+    
   } catch(error) {
     console.log('Error while deleting user: ', error)
 
@@ -362,11 +285,10 @@ const deleteUser = async (userId: string): Promise<IResponse> => {
 }
 
 export default {
-  sendLoginCode,
+  signup,
   login,
-  logout,
   getUser,
   editUser,
-  toggleFavoriteProduct,
+  changePassword,
   deleteUser
 }

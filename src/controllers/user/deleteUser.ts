@@ -8,7 +8,7 @@ import userService from "../../db/models/user/user.service"
 const deleteUser = async (req: Request, res: Response) => {
 
 	const handle = async () => {
-    const userId = req.params.id
+    const userId = res.locals.user._id
 
 		return await userService.deleteUser(userId)
 	}

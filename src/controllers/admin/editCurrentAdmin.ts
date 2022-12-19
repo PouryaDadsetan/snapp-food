@@ -31,9 +31,7 @@ const editCurrentAdmin = async (req: Request, res: Response) => {
 		return await adminService.editCurrentAdmin(adminId, adminUpdates)
 	}
 
-	const extractOutput = (outputs: object) => outputs
-
-	return handleRequest({ req, res, validationSchema, handle, extractOutput })
+	return handleRequest({ req, res, validationSchema, handle })
 }
 
 export default editCurrentAdmin

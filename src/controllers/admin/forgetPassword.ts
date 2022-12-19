@@ -17,9 +17,7 @@ const forgetPassword = async (req: Request, res: Response) => {
 		return await adminService.forgetPassword(email)
 	}
 
-	const extractOutput = (outputs: object) => outputs
-
-	return handleRequest({ req, res, validationSchema, handle, extractOutput })
+	return handleRequest({ req, res, validationSchema, handle })
 }
 
 export default forgetPassword

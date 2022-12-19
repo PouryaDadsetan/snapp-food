@@ -13,9 +13,7 @@ const getCurrentAdmin = async (req: Request, res: Response) => {
 		return await adminService.getAdmin(adminId)
 	}
 
-	const extractOutput = (outputs: object) => outputs
-
-	return handleRequest({ req, res, handle, extractOutput })
+	return handleRequest({ req, res, handle })
 }
 
 export default getCurrentAdmin
