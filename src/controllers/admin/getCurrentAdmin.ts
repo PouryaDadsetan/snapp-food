@@ -10,7 +10,7 @@ const getCurrentAdmin = async (req: Request, res: Response) => {
 	const handle = async () => {
     const adminId = res.locals.admin?._id
 
-		return await adminService.getAdmin(adminId)
+		return await adminService.getCurrentAdmin(adminId)
 	}
 
 	return handleRequest({ req, res, handle })

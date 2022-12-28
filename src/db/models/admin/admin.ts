@@ -6,6 +6,7 @@ export interface IAdmin extends Document {
   phone: string
   password: string
   name: string
+  isVerified: boolean
   createdAt: Date
   updatedAt: Date
 }
@@ -34,6 +35,11 @@ const adminSchema = new Schema<IAdmin>({
     type: String,
     required: true
   },
+  isVerified: {
+    type: Boolean,
+    required: true,
+    default: false
+  }
 }, {
   timestamps: true
 })

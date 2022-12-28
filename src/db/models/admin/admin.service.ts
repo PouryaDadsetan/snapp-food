@@ -9,25 +9,18 @@ const ObjectId = mongoose.Types.ObjectId
 const addAdmin = async (
   currentAdminIsGodAdmin: boolean,
   newAdmin: {
-    isSuperAdmin: boolean
     email: string
     password: string
     phone: string
     name: string
-    permissions: string[]
-  },
-  reportDetails: {
-    adminId: objectId
-    ip: string 
   }
 ): Promise<IResponse> => {
 
   try {
-    const { isSuperAdmin, email, password, phone, name, permissions } = newAdmin
-    const { adminId, ip } = reportDetails
+    const { email, password, phone, name } = newAdmin
 
     // checking godAdmin permissions
-    if(!currentAdminIsGodAdmin && isSuperAdmin) {
+    if(!currentAdminIsGodAdmin) {
       return {
         success: false,
         error: {
@@ -64,12 +57,10 @@ const addAdmin = async (
     }
 
     const createdAdmin = await Admin.create({
-      isSuperAdmin,
       email,
       password: encrypt(password),
       phone,
-      name,
-      permissions
+      name
     })
 
     return {
@@ -95,7 +86,6 @@ const addAdmin = async (
 
 const createGodAdmin = async (
   godAdmin: {
-    isGodAdmin: boolean,
     email: string,
     password: string,
     phone: string,
@@ -104,6 +94,7 @@ const createGodAdmin = async (
   ): Promise<IResponse> => {
 
   try {
+    const { email, password, phone, name } = godAdmin
     // checking godAdmin existence
     const existingGodAdmin = await Admin.findOne({ isGodAdmin: true }).exec()
     if(existingGodAdmin) {
@@ -116,9 +107,14 @@ const createGodAdmin = async (
       }
     }
 
-    godAdmin.password = encrypt(godAdmin.password)
-
-    const createdGodAdmin = await Admin.create(godAdmin)
+    const createdGodAdmin = await Admin.create({
+      isGodAdmin: true,
+      email,
+      password: encrypt(godAdmin.password),
+      phone,
+      name,
+      isVerified: true
+    })
     
     return {
       success: true,
@@ -143,13 +139,9 @@ const createGodAdmin = async (
 
 const login = async (
   email: string, 
-  password: string,
-  reportDetails: {
-    ip: string 
-  }
+  password: string
 ): Promise<IResponse> => {
   try {
-    const { ip } = reportDetails
     const admin = await Admin.findOne({ email }).exec()
     
     if(!admin || password !== decrypt(admin.password)) {
@@ -164,8 +156,6 @@ const login = async (
 
     const token = generateToken(admin._id, "admin")
 
-    await Admin.findByIdAndUpdate(admin._id, { $push: { tokens: token }}).exec()
-
     return {
       success: true,
       outputs: {
@@ -176,37 +166,6 @@ const login = async (
 
   } catch(error) {
     console.log('Error while logging in: ', error)
-
-    return {
-      success: false,
-      error: {
-        message: errorMessages.shared.ise,
-        statusCode: statusCodes.ise
-      }
-    }
-  }
-}
-
-//-----------------------------------------------------------
-
-const logout = async (
-  token: string,
-  reportDetails: {
-    adminId: objectId
-    ip: string 
-  }
-): Promise<IResponse> => {
-  try {
-    // popping old token from tokens list
-    const { adminId, ip } = reportDetails
-    await Admin.findOneAndUpdate({ tokens: token }, { $pull: { tokens: token }}).exec()
-
-    return {
-      success: true
-    }
-
-  } catch(error) {
-    console.log('Error while logging out: ', error)
 
     return {
       success: false,
@@ -241,7 +200,7 @@ const forgetPassword = async (email: string): Promise<IResponse> => {
     }
 
   } catch(error) {
-    console.log('Error while loging out: ', error)
+    console.log('Error while password recovery: ', error)
 
     return {
       success: false,
@@ -255,8 +214,19 @@ const forgetPassword = async (email: string): Promise<IResponse> => {
 
 //---------------------------------------------
 
-const changePassword = async (adminId: string, newPassword: string): Promise<IResponse> => {
+const changePassword = async (adminId: string, oldPassword: string, newPassword: string): Promise<IResponse> => {
   try {
+    // Checking old password to be correct
+    const admin = await Admin.findById(adminId).exec()
+    if(!admin || oldPassword !== decrypt(admin.password)) {
+      return {
+        success: false,
+        error: {
+          message: errorMessages.adminService.incorrectPassword,
+          statusCode: statusCodes.badRequest
+        }
+      }
+    }
 
     await Admin.findByIdAndUpdate(adminId, { $set: { password: encrypt(newPassword) }}).exec()
 
@@ -279,10 +249,23 @@ const changePassword = async (adminId: string, newPassword: string): Promise<IRe
 
 //---------------------------------------------
 
-const getAdmin = async (adminId: string): Promise<IResponse> => {
+const getAdmin = async (
+  currentAdminIsGodAdmin: boolean,
+  adminId: string
+): Promise<IResponse> => {
   try {
-    const admin = await Admin.findById(adminId)
+    // checking godAdmin permissions
+    if(!currentAdminIsGodAdmin) {
+      return {
+        success: false,
+        error: {
+          message: errorMessages.adminService.godAdminRoleRequired,
+          statusCode: statusCodes.badRequest
+        }
+      }
+    }
 
+    const admin = await Admin.findById(adminId)
     if(!admin) {
       return {
         success: false,
@@ -313,82 +296,17 @@ const getAdmin = async (adminId: string): Promise<IResponse> => {
   }
 }
 
-//----------------------------------------
+//---------------------------------------------
 
-const editAdmin = async (
-  adminId: string,
-  adminUpdates: {
-    isSuperAdmin?: string
-    email?: string
-    phone?: string
-    name?: string
-    permissions?: string[]
-  },
-  currentAdminIsGodAdmin: boolean
-): Promise<IResponse> => {
-
+const getCurrentAdmin = async (adminId: string): Promise<IResponse> => {
   try {
-
-    // checking adminUpdates object to not be empty
-    if(Object.keys(adminUpdates).length == 0) {
-      return {
-        success: false,
-        error: {
-          message: errorMessages.shared.noChanges,
-          statusCode: statusCodes.badRequest
-        }
-      }
-    }
-
-    // checking godAdmin permissions
-    if('isSuperAdmin' in adminUpdates && !currentAdminIsGodAdmin) {
-      return {
-        success: false,
-        error: {
-          message: errorMessages.adminService.godAdminRoleRequired,
-          statusCode: statusCodes.badRequest
-        }
-      }
-    }
-
-    // checking email availability
-    if(adminUpdates.email) {
-      const existingAdminWithThisEmail = await Admin.findOne({ email: adminUpdates.email }).exec()
-
-      if(existingAdminWithThisEmail) {
-        return {
-          success: false,
-          error: {
-            message: errorMessages.adminService.emailAlreadyTaken,
-            statusCode: statusCodes.badRequest
-          }
-        }
-      }
-    }
-
-    // checking phone availability
-    if(adminUpdates.phone) {
-      const existingAdminWithThisPhone = await Admin.findOne({ phone: adminUpdates.phone }).exec()
-    
-      if(existingAdminWithThisPhone) {
-        return {
-          success: false,
-          error: {
-            message: errorMessages.adminService.phoneAlreadyTaken,
-            statusCode: statusCodes.badRequest
-          }
-        }
-      }
-    }
-    
-    const updatedAdmin = await Admin.findByIdAndUpdate(adminId, adminUpdates, { new: true }).exec()
-
-    if(!updatedAdmin) {
+    const admin = await Admin.findById(adminId)
+    if(!admin) {
       return {
         success: false,
         error: {
           message: errorMessages.shared.notFound,
-          statusCode: statusCodes.badRequest
+          statusCode: statusCodes.notFound
         }
       }
     }
@@ -396,11 +314,12 @@ const editAdmin = async (
     return {
       success: true,
       outputs: {
-        admin: updatedAdmin
+        admin
       }
     }
+
   } catch(error) {
-    console.log('Error while updating an admin: ', error)
+    console.log('Error while getting current admin: ', error)
 
     return {
       success: false,
@@ -501,21 +420,9 @@ const editCurrentAdmin = async (
 
 const deleteAdmins = async (
   currentAdminIsGodAdmin: boolean, 
-  idList: string[],
-  reportDetails: {
-    adminId: objectId
-    ip: string 
-  }  
+  idList: string[]
 ): Promise<IResponse> => {
   try {
-    const filter = {
-      _id : { $in: idList },
-      isGodAdmin: false
-    }
-    const { adminId, ip } = reportDetails
-
-    const admins = await Admin.find(filter)
-
     // checking godAdmin permissions
     if(!currentAdminIsGodAdmin) {
       return {
@@ -527,9 +434,17 @@ const deleteAdmins = async (
       }
     }
 
+    const filter = {
+      _id : { $in: idList },
+      isGodAdmin: false
+    }
+
+    const admins = await Admin.find(filter)
+
     // deleting admins
     for(const admin of admins) {
-      const deletedAdmin = await Admin.findByIdAndDelete(admin._id).exec()
+      await Admin.findByIdAndDelete(admin._id).exec()
+      // TODO: Delete restaurant of deleted admin
     }
 
     return {
@@ -552,6 +467,7 @@ const deleteAdmins = async (
 //---------------------------------------------
 
 const getAdmins = async (
+  currentAdminIsGodAdmin: boolean,
   options: {
     limit?: number,
     skip?: number,
@@ -561,6 +477,16 @@ const getAdmins = async (
   }
 ): Promise<IResponse> => {
   try {
+    // checking godAdmin permissions
+    if(!currentAdminIsGodAdmin) {
+      return {
+        success: false,
+        error: {
+          message: errorMessages.adminService.godAdminRoleRequired,
+          statusCode: statusCodes.badRequest
+        }
+      }
+    }
 
     const { limit, skip, sortBy, sortOrder, search } = options
 
@@ -616,10 +542,9 @@ export default {
   addAdmin,
   createGodAdmin,
   login,
-  logout,
   getAdmins,
   getAdmin,
-  editAdmin,
+  getCurrentAdmin,
   editCurrentAdmin,
   deleteAdmins,
   forgetPassword,

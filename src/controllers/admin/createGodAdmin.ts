@@ -17,7 +17,6 @@ const createGodAdmin = async (req: Request, res: Response) => {
     const { email, password, phone, name } = req.body
 
     const godAdmin = {
-      isGodAdmin: true,
       email,
       password,
       phone,
