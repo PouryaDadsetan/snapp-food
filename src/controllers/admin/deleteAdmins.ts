@@ -13,18 +13,8 @@ const deleteAdmins = async (req: Request, res: Response) => {
 	const handle = async () => {
 		const currentAdminIsGodAdmin = res.locals.admin?.isGodAdmin
     const { idList } = req.body
-    
-    let ip: string = 'unknown'
-    if(req.ips.length) {
-      ip = req.ips[0]
-    }
-    
-    const reportDetails = {
-      adminId: res.locals.admin._id,
-      ip
-    }
 
-		return await adminService.deleteAdmins(currentAdminIsGodAdmin, idList, reportDetails)
+		return await adminService.deleteAdmins(currentAdminIsGodAdmin, idList)
 	}
 
 	return handleRequest({ req, res, validationSchema, handle })

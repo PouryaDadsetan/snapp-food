@@ -8,14 +8,15 @@ import adminService from "../../db/models/admin/admin.service"
 const changePassword = async (req: Request, res: Response) => {
 
   const validationSchema = yup.object().shape({
-    password: yup.string().required(),
+    oldPassword: yup.string().required(),
+    newPassword: yup.string().required(),
   })
 
 	const handle = async () => {
     const adminId = res.locals.admin?._id
-    const { password } = req.body
+    const { oldPassword, newPassword } = req.body
 
-		return await adminService.changePassword(adminId, password)
+		return await adminService.changePassword(adminId, oldPassword, newPassword)
 	}
 
 	return handleRequest({ req, res, validationSchema, handle })

@@ -16,7 +16,7 @@ const getAdmins = async (req: Request, res: Response) => {
   })
 
 	const handle = async () => {
-
+		const currentAdminIsGodAdmin = res.locals.admin?.isGodAdmin
     const { limit, skip, sortBy, sortOrder, search } = req.query
 
     const options = {
@@ -27,7 +27,7 @@ const getAdmins = async (req: Request, res: Response) => {
       search: search?.toString()
     }
 
-		return await adminService.getAdmins(options)
+		return await adminService.getAdmins(currentAdminIsGodAdmin, options)
 	}
 
 	return handleRequest({ req, res, queryValidationSchema, handle })

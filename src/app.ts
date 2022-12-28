@@ -58,9 +58,10 @@ const swaggerUiOptions = {
     docExpansion: 'none'
   }
 }
-server.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecification, swaggerUiOptions))
 
 server.use('/api', mainRouter)
+
+server.use('/api/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecification, swaggerUiOptions))
 
 // Logging errors
 server.use(expressWinston.errorLogger({

@@ -21,7 +21,8 @@ export const errorMessages = {
     phoneAlreadyTaken: "با شماره تلفن مورد نظر حساب ادمین وجود دارد",
     emailNotFound: "با ایمیل مورد نظر حساب کاربری وجود ندارد",
     godAdminAlreadyExists: "ادمین اصلی از قبل وجود دارد",
-    incorrectCredentials: "ایمیل یا رمز عبور اشتباه است"
+    incorrectCredentials: "ایمیل یا رمز عبور اشتباه است",
+    incorrectPassword: "رمز عبور اشتباه است",
   },
   userService: {
     phoneAlreadyTaken: "با شماره تلفن مورد نظر حساب کاربری وجود دارد",

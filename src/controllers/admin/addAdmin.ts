@@ -8,7 +8,6 @@ import { ObjectId  as objectId } from 'mongoose'
 
 const addAdmin = async (req: Request, res: Response) => {
   const validationSchema = yup.object().shape({
-    isSuperAdmin: yup.boolean().required(),
     email: yup.string().email().required(),
     password: yup.string().required(),
     phone: yup.string().required(),
@@ -18,31 +17,17 @@ const addAdmin = async (req: Request, res: Response) => {
 	const handle = async () => {
 		const currentAdminIsGodAdmin = res.locals.admin?.isGodAdmin
     
-    const { isSuperAdmin, email, password, phone, name, permissions } = req.body
+    const { email, password, phone, name } = req.body
 
     const newAdmin = {
-      isSuperAdmin,
       email: email.trim(),
       password: password.trim(),
       phone: phone.trim(),
-      name: name.trim(),
-      permissions
+      name: name.trim()
     }
 
-    let ip: string = 'unknown'
-    if(req.ips.length) {
-      ip = req.ips[0]
-    }
-
-    const reportDetails = {
-      adminId: res.locals.admin._id,
-      ip
-    }
-
-		return await adminService.addAdmin(currentAdminIsGodAdmin, newAdmin, reportDetails)
+		return await adminService.addAdmin(currentAdminIsGodAdmin, newAdmin)
 	}
-
-	const extractOutput = (outputs: object) => outputs
 
 	return handleRequest({ req, res, validationSchema, handle })
 }
