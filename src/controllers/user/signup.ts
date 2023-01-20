@@ -10,12 +10,13 @@ const signup = async (req: Request, res: Response) => {
   const validationSchema = yup.object().shape({
     email: yup.string().email().required(),
     password: yup.string().required(),
+    name: yup.string().required()
   })
 
 	const handle = async () => {
-    const { email, password } = req.body
+    const { email, password, name } = req.body
 
-		return await userService.signup(email, password)
+		return await userService.signup(email, password, name.trim())
 	}
 
 	return handleRequest({ req, res, validationSchema, handle })

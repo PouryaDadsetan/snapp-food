@@ -6,7 +6,7 @@ import mongoose, { ObjectId as objectId } from "mongoose"
 import { decrypt, encrypt } from "../../../utils/helpers/encryption"
 const ObjectId = mongoose.Types.ObjectId
 
-const signup = async (email: string, password: string): Promise<IResponse> => {
+const signup = async (email: string, password: string, name: string): Promise<IResponse> => {
   try {
     // Checking email availability
     const existingUserWithThisEmail = await User.findOne({ email }).exec()
@@ -22,7 +22,8 @@ const signup = async (email: string, password: string): Promise<IResponse> => {
     // Creating new user
     const newUser = {
       email,
-      password: encrypt(password)
+      password: encrypt(password),
+      name
     }
     const createdUser = await User.create(newUser)
 
