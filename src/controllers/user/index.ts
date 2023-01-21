@@ -266,19 +266,16 @@ userRouter.get('/', auth('user'), getCurrentUser)
  *           schema:
  *             type: object
  *             properties:
- *               updates:
- *                 type: object
- *                 properties:
- *                   name:
- *                     type: string
- *                   email:
- *                     type: string
- *                   phone:
- *                     type: string
- *                   addresses:
- *                     type: array
- *                     items:
- *                       type: string
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *               addresses:
+ *                 type: array
+ *                 items:
+ *                   type: string
  *     responses:
  *       200:
  *         description: A user object.

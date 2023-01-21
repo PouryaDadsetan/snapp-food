@@ -4,23 +4,33 @@ import  yup from "yup"
 import { statusCodes } from '../utils/constants'
 
 export interface IResponse {
-  success: boolean,
-  outputs?: object,
+  success: boolean
+  outputs?: object
   error?: {
-    message: string,
+    message: string
     statusCode: number
   }
 }
 
 interface IHandleRequestOptions {
-  req: Request,
-  res: Response,
-  validationSchema?: yup.AnyObjectSchema,
-  queryValidationSchema?: yup.AnyObjectSchema,
+  req: Request
+  res: Response
+  conversionSchema?: string[]
+  validationSchema?: yup.AnyObjectSchema
+  queryValidationSchema?: yup.AnyObjectSchema
   handle: () => Promise<IResponse>
 }
 
-export async function handleRequest({ req, res, validationSchema, handle, queryValidationSchema }: IHandleRequestOptions) {
+export async function handleRequest({ req, res, conversionSchema, validationSchema, handle, queryValidationSchema }: IHandleRequestOptions) {
+  // For converting array type fields of form data
+  if(conversionSchema) {
+    conversionSchema.forEach((conversion) => {
+      if(conversion in req.body) {
+        req.body[conversion] = req.body[conversion].split(',') 
+      }
+    })
+  }
+
 	if(validationSchema) {
 		try {
 			validationSchema.validateSync(req.body)
@@ -29,6 +39,7 @@ export async function handleRequest({ req, res, validationSchema, handle, queryV
 			return
 		}
 	}
+
 	if(queryValidationSchema) {
 		try {
 			queryValidationSchema.validateSync(req.query)
@@ -37,6 +48,7 @@ export async function handleRequest({ req, res, validationSchema, handle, queryV
 			return
 		}
 	}
+  
 	try {
 		const result = await handle()
 		if(!result.success) {

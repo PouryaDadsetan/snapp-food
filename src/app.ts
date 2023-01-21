@@ -17,6 +17,7 @@ const server: Express = express()
 
 server.use(express.json({limit: '50mb'}))
 server.use(express.urlencoded({ extended: true, limit: '10mb' }))
+server.use('/api/images', express.static('static'))
 server.use(cors())
 
 // Logging requests

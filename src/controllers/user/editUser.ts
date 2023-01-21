@@ -7,12 +7,10 @@ import userService from "../../db/models/user/user.service"
 const editUser = async (req: Request, res: Response) => {
 
   const validationSchema = yup.object().shape({
-    updates: yup.object({
-      name: yup.string(),
-      email: yup.string().email(),
-      phone: yup.string(),
-      addresses: yup.array().of(yup.string())
-    })
+    name: yup.string(),
+    email: yup.string().email(),
+    phone: yup.string(),
+    addresses: yup.array().of(yup.string())
   })
 
 	const handle = async () => {
@@ -21,9 +19,9 @@ const editUser = async (req: Request, res: Response) => {
     const allowedUpdates = ["name", "email", "phone", "addresses"]
     const updates: { [key: string]: any} = {}
 
-    Object.keys(req.body.updates || {}).forEach((update) => {
+    Object.keys(req.body || {}).forEach((update) => {
       if(allowedUpdates.includes(update)) {
-        updates[update] = req.body.updates[update]
+        updates[update] = req.body[update]
       }
     })
 
