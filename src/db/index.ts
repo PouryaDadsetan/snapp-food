@@ -2,6 +2,7 @@ import mongoose, { ConnectOptions } from 'mongoose'
 mongoose.Promise = global.Promise
 import config from '../utils/config'
 
+mongoose.set('strictQuery', true)
 mongoose.connect(config.dbUrl)
 
 const db = mongoose.connection

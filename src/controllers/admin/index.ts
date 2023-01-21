@@ -434,15 +434,12 @@ adminRouter.get('/', auth('admin'), getAdmins)
  *           schema:
  *             type: object
  *             properties:
- *               updates:
- *                 type: object
- *                 properties:
- *                   email:
- *                     type: string
- *                   phone:
- *                     type: string
- *                   name:
- *                     type: string
+ *               email:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *               name:
+ *                 type: string
  *     responses:
  *       200:
  *         description: An admin object.

@@ -40,5 +40,8 @@ export const errorMessages = {
     nameMustBeUnique: 'نام انتخاب شده از قبل وجود دارد', 
     slugMustBeUnique: 'شناسه لینک انتخاب شده از قبل وجود دارد',
     noChanges: 'هیچ تغییری وجود ندارد'
+  },
+  restaurantService: {
+    changesNotAllowed: 'امکان این تغییر بعد از تکمیل اعتبارسنجی وجود ندارد'
   }
 }

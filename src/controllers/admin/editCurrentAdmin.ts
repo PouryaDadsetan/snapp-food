@@ -7,11 +7,9 @@ import adminService from "../../db/models/admin/admin.service"
 const editCurrentAdmin = async (req: Request, res: Response) => {
 
   const validationSchema = yup.object().shape({
-    updates: yup.object({
-      email: yup.string().email(),
-      phone: yup.string(),
-      name: yup.string(),
-    })
+    email: yup.string().email(),
+    phone: yup.string(),
+    name: yup.string()
   })
 
 	const handle = async () => {
@@ -22,9 +20,9 @@ const editCurrentAdmin = async (req: Request, res: Response) => {
 
     const adminUpdates: { [key: string]: any} = {}
 
-    Object.keys(req.body.updates || {}).forEach((update) => {
+    Object.keys(req.body || {}).forEach((update) => {
       if(allowedUpdates.includes(update)) {
-        adminUpdates[update] = req.body.updates[update]
+        adminUpdates[update] = req.body[update]
       }
     })
 
