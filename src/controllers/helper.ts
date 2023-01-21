@@ -32,16 +32,7 @@ export async function handleRequest({ req, res, conversionSchema, validationSche
     })
   }
 
-  req: Request,
-  res: Response,
-  validationSchema?: yup.AnyObjectSchema,
-  queryValidationSchema?: yup.AnyObjectSchema,
-  paramsValidationSchema?: yup.AnyObjectSchema,
-  handle: () => Promise<IResponse>
-}
-
-export async function handleRequest({ req, res, validationSchema, handle, queryValidationSchema, paramsValidationSchema }: IHandleRequestOptions) {
-	if(validationSchema) {
+  if(validationSchema) {
 		try {
 			validationSchema.validateSync(req.body)
 		} catch(error) {

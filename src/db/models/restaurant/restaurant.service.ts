@@ -5,6 +5,7 @@ import Admin from '../admin/admin'
 import { IResponse } from "../../../controllers/helper"
 import { statusCodes, errorMessages } from "../../../utils/constants"
 import filesHelper from '../../../utils/helpers/files'
+import Food from '../food/food'
 
 const addRestaurant = async (
   adminId: objectId,
@@ -32,10 +33,10 @@ const addRestaurant = async (
       }
     }
 
-    // Saving the image in the database
-    let fileNames: string = ''
+    // Saving the image
+    let fileName: string = ''
     if(image) {
-      fileNames = filesHelper.saveFile(image)
+      fileName = filesHelper.saveFile(image)
     }
 
     // Creating the new restaurant
@@ -43,7 +44,7 @@ const addRestaurant = async (
       name,
       city,
       address,
-      image: fileNames,
+      image: fileName,
       categories,
       registrationNumber,
       admin: adminId
@@ -421,10 +422,16 @@ const deleteRestaurants = async (isGodAdmin: boolean, idList: string): Promise<I
         // Deleting the image of the deleted restaurant
         filesHelper.deleteFile(deletedRestaurant.image)
 
-        // TODO: Uncomment after implementing food service
         // Deleting all foods of the deleted restaurant
-        // const foodIds = deletedRestaurant.foods.map((food) => food._id.toString())
-        // await foodService.deleteFoods(foodIds)
+        const foodIds = deletedRestaurant.foods.map((food) => food._id.toString())
+        for(const foodId of foodIds) {
+          // Find and delete the food
+          const deletedFood = await Food.findByIdAndDelete(foodId).exec()
+          if(deletedFood) {
+            // Delete the potential image
+            filesHelper.deleteFile(deletedFood.image)
+          }
+        }
       }
     }
 

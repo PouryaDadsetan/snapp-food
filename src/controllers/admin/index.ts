@@ -251,7 +251,7 @@ adminRouter.get('/current', auth('admin'), getCurrentAdmin)
 
 /**
  * @swagger
- * /api/admin/{adminId}:
+ * /api/admin/adminId/{adminId}:
  *   get:
  *     tags:
  *       - Admin
@@ -321,7 +321,7 @@ adminRouter.get('/current', auth('admin'), getCurrentAdmin)
  *                 message:
  *                   type: string
  */
-adminRouter.get('/:adminId', auth('admin'), getAdmin)
+adminRouter.get('/adminId/:adminId', auth('admin'), getAdmin)
 
 
 
