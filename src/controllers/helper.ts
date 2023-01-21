@@ -18,10 +18,11 @@ interface IHandleRequestOptions {
   conversionSchema?: string[]
   validationSchema?: yup.AnyObjectSchema
   queryValidationSchema?: yup.AnyObjectSchema
+  paramsValidationSchema?: yup.AnyObjectSchema
   handle: () => Promise<IResponse>
 }
 
-export async function handleRequest({ req, res, conversionSchema, validationSchema, handle, queryValidationSchema }: IHandleRequestOptions) {
+export async function handleRequest({ req, res, conversionSchema, validationSchema, handle, queryValidationSchema, paramsValidationSchema }: IHandleRequestOptions) {
   // For converting array type fields of form data
   if(conversionSchema) {
     conversionSchema.forEach((conversion) => {
@@ -48,7 +49,14 @@ export async function handleRequest({ req, res, conversionSchema, validationSche
 			return
 		}
 	}
-  
+	if(paramsValidationSchema) {
+		try {
+			paramsValidationSchema.validateSync(req.params)
+		} catch(error) {
+			res.status(statusCodes.ue).send({ message: (error as Error).message })
+			return
+		}
+	}
 	try {
 		const result = await handle()
 		if(!result.success) {

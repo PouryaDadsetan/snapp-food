@@ -32,6 +32,9 @@ export const errorMessages = {
     incorrectPassword: "رمز عبور اشتباه است",
     noSuchUser: "کاربر مورد نظر وجود ندارد"
   },
+  foodService: {
+    adminHasNoRestaurant: 'ادمین رستورات ندارد'
+  },
   shared: {
     ise: "سرور با مشکل مواجه شده",
     permissionsRequired: "شما دسترسی لازم برای این کار را ندارید",
@@ -45,3 +48,5 @@ export const errorMessages = {
     changesNotAllowed: 'امکان این تغییر بعد از تکمیل اعتبارسنجی وجود ندارد'
   }
 }
+
+export const categories = ['ایرانی', 'فست فود']
