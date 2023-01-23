@@ -35,6 +35,9 @@ export const errorMessages = {
   foodService: {
     adminHasNoRestaurant: 'ادمین رستورات ندارد'
   },
+  commentService: {
+    foodNotFound: 'غذای مورد نظر یافت نشد'
+  },
   shared: {
     ise: "سرور با مشکل مواجه شده",
     permissionsRequired: "شما دسترسی لازم برای این کار را ندارید",

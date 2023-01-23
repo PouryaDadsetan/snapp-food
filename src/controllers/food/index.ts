@@ -11,9 +11,13 @@ import getFoodsByRestaurantId from './getFoodsByRestaurantId'
 import getFoodsOfCurrentAdmin from './getFoodsOfCurrentAdmin'
 import editFood from './editFood'
 import deleteFoods from './deleteFoods'
+import { adminCommentRouter, userCommentRouter } from '../comment'
 
 export const adminFoodRouter = Router()
 export const userFoodRouter = Router()
+
+adminFoodRouter.use('/comment', adminCommentRouter)
+userFoodRouter.use('/comment', userCommentRouter)
 
 /**
  * @swagger
@@ -529,7 +533,7 @@ adminFoodRouter.patch('/:foodId', auth('admin'), upload, editFood)
  *   post:
  *     tags:
  *       - Food | Admin
- *     summary: Delete a list of foods (God admin only)
+ *     summary: Delete a list of foods
  *     description: Delete a list of foods by passing an array of their id's  
  *     security:
  *       - adminBearerAuth: []

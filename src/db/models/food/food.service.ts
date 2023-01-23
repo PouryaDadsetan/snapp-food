@@ -3,6 +3,7 @@ import { ObjectId as objectId } from 'mongoose'
 import { IResponse } from "../../../controllers/helper"
 import { statusCodes, errorMessages } from "../../../utils/constants"
 import Restaurant from '../restaurant/restaurant'
+import Comment from '../comment/comment'
 import Food from './food'
 import filesHelper from '../../../utils/helpers/files'
 
@@ -412,8 +413,13 @@ const deleteFoods = async (adminId: string, idList: string): Promise<IResponse> 
     }
     for(const id of idList) {
       // Find and delete the food
-      const deletedFood = await Food.findOneAndDelete({ _id: id, restaurant: restaurant._id }).exec()
+      const deletedFood = await Food.findOneAndDelete({ _id: id, restaurant: restaurant._id })
+        .populate('comments', '_id').exec()
       if(deletedFood) {
+        // Delete comments of the deleted food
+        for(const comment of deletedFood.comments) {
+          await Comment.findByIdAndDelete(comment._id).exec()
+        }
         // Delete the potential image
         filesHelper.deleteFile(deletedFood.image)
       }

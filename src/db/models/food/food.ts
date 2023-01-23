@@ -11,6 +11,9 @@ export interface IFood extends Document {
   restaurant: objectId
   rating: number
   ratingsCount: number
+  comments: { // Virtual field
+    _id: objectId
+  }[]
   createAt: Date
   updatedAt: Date
 }
@@ -71,6 +74,12 @@ foodSchema.methods.toJSON = function() {
 
   return foodObject
 }
+
+foodSchema.virtual('comments', {
+  ref: 'Comment',
+  localField: '_id',
+  foreignField: 'food'
+})
 
 const Food = mongoose.model<IFood>('Food', foodSchema)
 
