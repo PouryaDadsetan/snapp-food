@@ -14,6 +14,10 @@ const saveFile = (file: Express.Multer.File): string => {
 }
 
 const deleteFile = (fileName: string) => {
+  if(!fs.existsSync('./static')) {
+    fs.mkdirSync('./static')
+  }
+
   if(fileName) {
     const targetPath = 'static/' + fileName
     if(fs.existsSync(targetPath)) {

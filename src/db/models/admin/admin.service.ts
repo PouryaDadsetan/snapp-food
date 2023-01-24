@@ -265,7 +265,7 @@ const getAdmin = async (
       }
     }
 
-    const admin = await Admin.findById(adminId)
+    const admin = await Admin.findById(adminId).exec()
     if(!admin) {
       return {
         success: false,
@@ -300,7 +300,7 @@ const getAdmin = async (
 
 const getCurrentAdmin = async (adminId: string): Promise<IResponse> => {
   try {
-    const admin = await Admin.findById(adminId)
+    const admin = await Admin.findById(adminId).exec()
     if(!admin) {
       return {
         success: false,
@@ -439,7 +439,7 @@ const deleteAdmins = async (
       isGodAdmin: false
     }
 
-    const admins = await Admin.find(filter)
+    const admins = await Admin.find(filter).exec()
 
     // deleting admins
     for(const admin of admins) {

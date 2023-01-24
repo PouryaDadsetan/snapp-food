@@ -2,20 +2,21 @@ import * as yup from 'yup'
 import { Request, Response } from 'express'
 
 import { handleRequest } from '../helper'
-import restaurantService from "../../db/models/restaurant/restaurant.service"
+import orderService from "../../db/models/order/order.service"
 
-const getRestaurants = async (req: Request, res: Response) => {
+const getOrdersOfCurrentAdmin = async (req: Request, res: Response) => {
 
   const queryValidationSchema = yup.object().shape({
     limit: yup.string(),
     skip: yup.string(),
-    sortBy: yup.string().oneOf(['rating', 'createdAt', 'updatedAt']),
+    sortBy: yup.string().oneOf(['totalSum', 'createdAt', 'updatedAt']),
     sortOrder: yup.string().oneOf(['asc', 'desc']),
-    search: yup.string()
+    search: yup.string().oneOf(['preparing', 'delivering', 'delivered', 'canceled'])
   })
   
 	const handle = async () => {
     const { limit, skip, sortBy, sortOrder, search } = req.query
+    const adminId = res.locals.admin._id
     
     const options = {
       limit: limit ? Number(limit) : undefined,
@@ -25,10 +26,10 @@ const getRestaurants = async (req: Request, res: Response) => {
       search: search?.toString()
     }
 
-		return await restaurantService.getRestaurants(options)
+		return await orderService.getOrdersOfCurrentAdmin(adminId, options)
 	}
 
 	return handleRequest({ req, res, queryValidationSchema, handle })
 }
 
-export default getRestaurants
+export default getOrdersOfCurrentAdmin

@@ -44,6 +44,12 @@ const adminSchema = new Schema<IAdmin>({
   timestamps: true
 })
 
+adminSchema.virtual('restaurant', {
+  ref: 'Restaurant',
+  localField: '_id',
+  foreignField: 'admin'
+})
+
 adminSchema.methods.toJSON = function() {
   const admin = this
   const adminObject = admin.toObject()
