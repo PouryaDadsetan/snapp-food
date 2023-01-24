@@ -53,7 +53,8 @@ export const errorMessages = {
     noSuchRestaurant: "رستوران مورد نظر وجود ندارد"
   },
   orderService: {
-    invalidState: 'امکان این تغییر وضعیت  وجود ندارد'
+    invalidState: 'امکان این تغییر وضعیت  وجود ندارد',
+    notRatable: 'فقط سفارش های تحویل شده قابلیت امتیازدهی دارند'
   }
 }
 

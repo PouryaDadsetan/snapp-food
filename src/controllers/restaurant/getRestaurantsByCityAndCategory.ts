@@ -4,7 +4,7 @@ import { Request, Response } from 'express'
 import { handleRequest } from '../helper'
 import restaurantService from "../../db/models/restaurant/restaurant.service"
 
-const getRestaurantsByCategory = async (req: Request, res: Response) => {
+const getRestaurantsByCityAndCategory = async (req: Request, res: Response) => {
 
   const queryValidationSchema = yup.object().shape({
     limit: yup.string(),
@@ -15,7 +15,7 @@ const getRestaurantsByCategory = async (req: Request, res: Response) => {
   })
   
 	const handle = async () => {
-    const { category } = req.params
+    const { category, city } = req.params
     const { limit, skip, sortBy, sortOrder, search } = req.query
     
     const options = {
@@ -26,10 +26,10 @@ const getRestaurantsByCategory = async (req: Request, res: Response) => {
       search: search?.toString()
     }
 
-		return await restaurantService.getRestaurantsByCategory(category, options)
+		return await restaurantService.getRestaurantsByCityAndCategory(city, category, options)
 	}
 
 	return handleRequest({ req, res, queryValidationSchema, handle })
 }
 
-export default getRestaurantsByCategory
+export default getRestaurantsByCityAndCategory

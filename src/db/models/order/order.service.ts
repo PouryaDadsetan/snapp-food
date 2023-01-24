@@ -425,6 +425,15 @@ const rateOrder = async (
     }
 
     const restaurant = await Restaurant.findById(order?.restaurant).exec()
+    if(order.state !== 'delivered') {
+      return  {
+        success: false,
+        error: {
+          statusCode: statusCodes.badRequest,
+          message: errorMessages.orderService.notRatable
+        } 
+      }
+    }
 
     // Apply the ratings
     // For foods
