@@ -357,7 +357,7 @@ const editFood = async (
     if(updates.name) {
       const { name } = updates
       const existingFood = await Food.findOne({ name, restaurant: restaurant._id }).exec()
-      if(existingFood) {
+      if(existingFood && existingFood._id.toString() ==! foodId) {
         return {
           success: false,
           error: {

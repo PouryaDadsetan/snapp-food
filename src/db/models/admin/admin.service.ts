@@ -359,7 +359,7 @@ const editCurrentAdmin = async (
     if(adminUpdates.email) {
       const existingAdminWithThisEmail = await Admin.findOne({ email: adminUpdates.email }).exec()
 
-      if(existingAdminWithThisEmail) {
+      if(existingAdminWithThisEmail && existingAdminWithThisEmail._id.toString() ==! adminId) {
         return {
           success: false,
           error: {

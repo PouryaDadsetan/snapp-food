@@ -295,21 +295,21 @@ const editRestaurant = async (
     }
 
     // Not allowed to change registration number after verifying
-    if(updates.registrationNumber && restaurant.isVerified) {
-      return {
-        success: false,
-        error: {
-          statusCode: statusCodes.badRequest,
-          message: errorMessages.restaurantService.changesNotAllowed
-        }
-      }
-    }
+    // if(updates.registrationNumber && restaurant.isVerified) {
+    //   return {
+    //     success: false,
+    //     error: {
+    //       statusCode: statusCodes.badRequest,
+    //       message: errorMessages.restaurantService.changesNotAllowed
+    //     }
+    //   }
+    // }
     
     // Checking for availability
     if(updates.name) {
       const { name } = updates
       const restaurantWithExistingName = await Restaurant.findOne({ name }).exec()
-      if(restaurantWithExistingName) {
+      if(restaurantWithExistingName && restaurantWithExistingName._id.toString() ==! restaurant._id.toString()) {
         return {
           success: false,
           error: {

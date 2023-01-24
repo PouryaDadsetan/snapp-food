@@ -56,10 +56,13 @@ export const userRouter = Router()
  *                 type: string
  *               name:
  *                 type: string
+ *               phone:
+ *                 type: string
  *             required:
  *               - email
  *               - password
  *               - name
+ *               - phone
  *     responses:
  *       200:
  *         description: Sign up was successful

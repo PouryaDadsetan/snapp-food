@@ -21,7 +21,11 @@ const editUser = async (req: Request, res: Response) => {
 
     Object.keys(req.body || {}).forEach((update) => {
       if(allowedUpdates.includes(update)) {
-        updates[update] = req.body[update]
+        if(['name', 'email'].includes(update)) {
+          updates[update] = req.body[update].trim()
+        } else {
+          updates[update] = req.body[update]
+        }
       }
     })
 
