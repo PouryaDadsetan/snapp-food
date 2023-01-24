@@ -15,7 +15,7 @@ const getRestaurantsByCategory = async (req: Request, res: Response) => {
   })
   
 	const handle = async () => {
-    const { category, city } = req.params
+    const { category } = req.params
     const { limit, skip, sortBy, sortOrder, search } = req.query
     
     const options = {
@@ -26,7 +26,7 @@ const getRestaurantsByCategory = async (req: Request, res: Response) => {
       search: search?.toString()
     }
 
-		return await restaurantService.getRestaurantsByCategory(city, category, options)
+		return await restaurantService.getRestaurantsByCategory(category, options)
 	}
 
 	return handleRequest({ req, res, queryValidationSchema, handle })

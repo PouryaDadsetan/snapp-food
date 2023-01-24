@@ -9,6 +9,7 @@ import getRestaurantOfCurrentAdmin from './getRestaurantOfCurrentAdmin'
 import getRestaurants from './getRestaurants'
 import getRestaurantsByCity from './getRestaurantsByCity'
 import getRestaurantsByCategory from './getRestaurantsByCategory'
+import getRestaurantsByCityAndCategory from './getRestaurantsByCityAndCategory'
 import editRestaurant from './editRestaurant'
 import verifyRestaurant from './verifyRestaurant'
 import deleteRestaurants from './deleteRestaurants'
@@ -524,6 +525,214 @@ adminRestaurantRouter.get('/', auth('admin'), getRestaurants)
  *                   type: string
  */
 adminRestaurantRouter.get('/city/:city', auth('admin'), getRestaurantsByCity)
+
+
+
+/**
+ * @swagger
+ * /api/admin/restaurant/category/{category}:
+ *   get:
+ *     tags:
+ *       - Restaurant | User
+ *     summary: Get a list of restaurants by category
+ *     description: Get a list of restaurants by category in full details by passing the desired query parameters
+ *     security:
+ *       - adminBearerAuth: []
+ *     parameters:
+ *       - name: category
+ *         in: path
+ *         required: true
+ *         description: The category to filter the restaurants by
+ *         schema:
+ *           type: string
+ *       - name: limit
+ *         in: query
+ *         schema:
+ *           type: number
+ *         description: The number of items to return
+ *       - name: skip
+ *         in: query
+ *         schema:
+ *           type: number
+ *         description: The number of items to skip before starting to collect the results
+ *       - name: sortBy
+ *         in: query
+ *         schema:
+ *           type: string
+ *           enum: ['rating', 'createdAt', 'updatedAt']
+ *         description: The property to sort by
+ *       - name: sortOrder
+ *         in: query
+ *         schema:
+ *           type: string
+ *           enum: ['asc', 'desc']
+ *         description: The order to sort by
+ *       - name: search
+ *         in: query
+ *         schema:
+ *           type: string
+ *         description: The expression to filter the name of results by
+ *     responses:
+ *       200:
+ *         description: The list of restaurants
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 count:
+ *                   type: number
+ *                 restaurants: 
+ *                   type: array
+ *                   items: 
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       city:
+ *                         type: string
+ *                       address:
+ *                         type: string
+ *                       image:
+ *                         type: string
+ *                       categories:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                       registrationNumber:
+ *                         type: string
+ *                       rating:
+ *                         type: number
+ *                       ratingsCount:
+ *                         type: number
+ *                       admin:
+ *                         type: string
+ *                       isVerified:
+ *                         type: boolean
+ *                       createdAt:
+ *                         type: number
+ *                       updatedAt:
+ *                         type: number
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
+userRestaurantRouter.get('/category/:category', auth('admin'), getRestaurantsByCategory)
+
+
+
+/**
+ * @swagger
+ * /api/admin/restaurant/city/{city}/category/{category}:
+ *   get:
+ *     tags:
+ *       - Restaurant | Admin
+ *     summary: Get a list of restaurants by city and category
+ *     description: Get a list of restaurants by city and category in full details by passing the desired query parameters
+ *     security:
+ *       - adminBearerAuth: []
+ *     parameters:
+ *       - name: city
+ *         in: path
+ *         required: true
+ *         description: The city whose restaurants are to be fetched
+ *         schema:
+ *           type: string
+ *       - name: category
+ *         in: path
+ *         required: true
+ *         description: The category to filter the restaurants by
+ *         schema:
+ *           type: string
+ *       - name: limit
+ *         in: query
+ *         schema:
+ *           type: number
+ *         description: The number of items to return
+ *       - name: skip
+ *         in: query
+ *         schema:
+ *           type: number
+ *         description: The number of items to skip before starting to collect the results
+ *       - name: sortBy
+ *         in: query
+ *         schema:
+ *           type: string
+ *           enum: ['rating', 'createdAt', 'updatedAt']
+ *         description: The property to sort by
+ *       - name: sortOrder
+ *         in: query
+ *         schema:
+ *           type: string
+ *           enum: ['asc', 'desc']
+ *         description: The order to sort by
+ *       - name: search
+ *         in: query
+ *         schema:
+ *           type: string
+ *         description: The expression to filter the name of results by
+ *     responses:
+ *       200:
+ *         description: The list of restaurants
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 count:
+ *                   type: number
+ *                 restaurants: 
+ *                   type: array
+ *                   items: 
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       city:
+ *                         type: string
+ *                       address:
+ *                         type: string
+ *                       image:
+ *                         type: string
+ *                       categories:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                       registrationNumber:
+ *                         type: string
+ *                       rating:
+ *                         type: number
+ *                       ratingsCount:
+ *                         type: number
+ *                       admin:
+ *                         type: string
+ *                       isVerified:
+ *                         type: boolean
+ *                       createdAt:
+ *                         type: number
+ *                       updatedAt:
+ *                         type: number
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
+userRestaurantRouter.get('/city/:city/category/:category', auth('admin'), getRestaurantsByCityAndCategory)
 
 
 
@@ -1060,12 +1269,111 @@ userRestaurantRouter.get('/', getRestaurantsByCity)
 
 /**
  * @swagger
- * /api/user/restaurant/city/{city}/category/{category}:
+ * /api/user/restaurant/category/{category}:
  *   get:
  *     tags:
  *       - Restaurant | User
  *     summary: Get a list of restaurants by category
  *     description: Get a list of restaurants by category in full details by passing the desired query parameters
+ *     parameters:
+ *       - name: category
+ *         in: path
+ *         required: true
+ *         description: The category to filter the restaurants by
+ *         schema:
+ *           type: string
+ *       - name: limit
+ *         in: query
+ *         schema:
+ *           type: number
+ *         description: The number of items to return
+ *       - name: skip
+ *         in: query
+ *         schema:
+ *           type: number
+ *         description: The number of items to skip before starting to collect the results
+ *       - name: sortBy
+ *         in: query
+ *         schema:
+ *           type: string
+ *           enum: ['rating', 'createdAt', 'updatedAt']
+ *         description: The property to sort by
+ *       - name: sortOrder
+ *         in: query
+ *         schema:
+ *           type: string
+ *           enum: ['asc', 'desc']
+ *         description: The order to sort by
+ *       - name: search
+ *         in: query
+ *         schema:
+ *           type: string
+ *         description: The expression to filter the name of results by
+ *     responses:
+ *       200:
+ *         description: The list of restaurants
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 count:
+ *                   type: number
+ *                 restaurants: 
+ *                   type: array
+ *                   items: 
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       city:
+ *                         type: string
+ *                       address:
+ *                         type: string
+ *                       image:
+ *                         type: string
+ *                       categories:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                       registrationNumber:
+ *                         type: string
+ *                       rating:
+ *                         type: number
+ *                       ratingsCount:
+ *                         type: number
+ *                       admin:
+ *                         type: string
+ *                       isVerified:
+ *                         type: boolean
+ *                       createdAt:
+ *                         type: number
+ *                       updatedAt:
+ *                         type: number
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
+userRestaurantRouter.get('/category/:category', getRestaurantsByCategory)
+
+
+
+/**
+ * @swagger
+ * /api/user/restaurant/city/{city}/category/{category}:
+ *   get:
+ *     tags:
+ *       - Restaurant | User
+ *     summary: Get a list of restaurants by city and category
+ *     description: Get a list of restaurants by city and category in full details by passing the desired query parameters
  *     parameters:
  *       - name: city
  *         in: path
@@ -1159,5 +1467,5 @@ userRestaurantRouter.get('/', getRestaurantsByCity)
  *                 message:
  *                   type: string
  */
-userRestaurantRouter.get('/city/:city/category/:category', getRestaurantsByCategory)
+userRestaurantRouter.get('/city/:city/category/:category', getRestaurantsByCityAndCategory)
 

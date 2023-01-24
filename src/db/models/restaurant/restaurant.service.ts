@@ -257,6 +257,64 @@ const getRestaurantsByCity = async (
 // ----------------------------------------------------------------------------
 
 const getRestaurantsByCategory = async (
+  category: string,
+  options: {
+    limit?: number
+    skip?: number
+    sortBy?: string
+    sortOrder?: string
+    search?: string
+  }
+): Promise<IResponse> => {
+  try {
+    const { limit, skip, sortBy, sortOrder, search } = options
+
+    // Create and fill the query options object
+    const queryOptions: { [key: string]: any } = {}
+    
+    if(limit) {
+      queryOptions['limit'] = limit
+    }
+    if(skip) {
+      queryOptions['skip'] = skip
+    }
+    if(sortBy) {
+      queryOptions['sort'] = {}
+      queryOptions['sort'][`${sortBy}`] = sortOrder || 'asc'
+    }
+
+    const filter: { [key: string]: any } = { categories: category, isVerified: true }
+    if(search) {
+      filter.name = { $regex: search }
+    }
+
+    // Fetch the restaurants
+    const count = await Restaurant.countDocuments(filter)
+    const restaurants = await Restaurant.find(filter, {}, queryOptions).exec()
+
+    return {
+      success: true,
+      outputs: { 
+        count,
+        restaurants
+      }
+    }
+
+  } catch(error) {
+    console.log('Error while getting the restaurants: ', error)
+    return {
+      success: false,
+      error: {
+        statusCode: statusCodes.ise,
+        message: errorMessages.shared.ise
+      }
+    }
+  }
+}
+
+// ----------------------------------------------------------------------------
+
+const getRestaurantsByCityAndCategory = async (
   city: string,
   category: string,
   options: {
@@ -515,6 +573,7 @@ export default {
   getRestaurants,
   getRestaurantsByCity,
   getRestaurantsByCategory,
+  getRestaurantsByCityAndCategory,
   editRestaurant,
   verifyRestaurant,
   deleteRestaurants
