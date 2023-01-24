@@ -21,14 +21,14 @@ const addRestaurant = async (
   try {
     const { name, city, address, image, categories, registrationNumber } = newRestaurant
 
-    // Checking for availability
-    const restaurantWithExistingName = await Restaurant.findOne({ name, admin: adminId }).exec()
-    if(restaurantWithExistingName) {
+    // Checking for existing restaurant
+    const existingRestaurant = await Restaurant.findOne({ admin: adminId }).exec()
+    if(existingRestaurant) {
       return {
         success: false,
         error: {
           statusCode: statusCodes.badRequest,
-          message: errorMessages.shared.nameMustBeUnique
+          message: errorMessages.adminService.existingRestaurant
         }
       }
     }
@@ -142,6 +142,63 @@ const getRestaurantOfCurrentAdmin = async (adminId: objectId): Promise<IResponse
 // ----------------------------------------------------------------------------
 
 const getRestaurants = async (
+  options: {
+    limit?: number
+    skip?: number
+    sortBy?: string
+    sortOrder?: string
+    search?: string
+  }
+): Promise<IResponse> => {
+  try {
+    const { limit, skip, sortBy, sortOrder, search } = options
+
+    // Create and fill the query options object
+    const queryOptions: { [key: string]: any } = {}
+    
+    if(limit) {
+      queryOptions['limit'] = limit
+    }
+    if(skip) {
+      queryOptions['skip'] = skip
+    }
+    if(sortBy) {
+      queryOptions['sort'] = {}
+      queryOptions['sort'][`${sortBy}`] = sortOrder || 'asc'
+    }
+
+    const filter: { [key: string]: any } = {}
+    if(search) {
+      filter.name = { $regex: search }
+    }
+
+    // Fetch the restaurants
+    const count = await Restaurant.countDocuments(filter)
+    const restaurants = await Restaurant.find(filter, {}, queryOptions).exec()
+
+    return {
+      success: true,
+      outputs: { 
+        count,
+        restaurants
+      }
+    }
+
+  } catch(error) {
+    console.log('Error while getting the restaurants: ', error)
+    return {
+      success: false,
+      error: {
+        statusCode: statusCodes.ise,
+        message: errorMessages.shared.ise
+      }
+    }
+  }
+}
+
+// ----------------------------------------------------------------------------
+
+const getRestaurantsByCity = async (
   city: string,
   options: {
     limit?: number
@@ -456,6 +513,7 @@ export default {
   getRestaurant,
   getRestaurantOfCurrentAdmin,
   getRestaurants,
+  getRestaurantsByCity,
   getRestaurantsByCategory,
   editRestaurant,
   verifyRestaurant,

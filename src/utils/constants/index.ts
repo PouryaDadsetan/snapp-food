@@ -23,6 +23,7 @@ export const errorMessages = {
     godAdminAlreadyExists: "ادمین اصلی از قبل وجود دارد",
     incorrectCredentials: "ایمیل یا رمز عبور اشتباه است",
     incorrectPassword: "رمز عبور اشتباه است",
+    existingRestaurant: 'شما از قبل یک رستوران ساخته اید'
   },
   userService: {
     phoneAlreadyTaken: "با شماره تلفن مورد نظر حساب کاربری وجود دارد",
@@ -33,7 +34,8 @@ export const errorMessages = {
     noSuchUser: "کاربر مورد نظر وجود ندارد"
   },
   foodService: {
-    adminHasNoRestaurant: 'ادمین رستورات ندارد'
+    adminHasNoRestaurant: 'ادمین رستوران ندارد',
+    notAllOrderFoodsMatch: 'یک یا چند تا از غذاهای سفارش نامعتبر است'
   },
   shared: {
     ise: "سرور با مشکل مواجه شده",
@@ -41,11 +43,14 @@ export const errorMessages = {
     unauthorized: "هویت شما احراز نشده است",
     notFound: "محتوای مورد نظر یافت نشد",
     nameMustBeUnique: 'نام انتخاب شده از قبل وجود دارد', 
-    slugMustBeUnique: 'شناسه لینک انتخاب شده از قبل وجود دارد',
     noChanges: 'هیچ تغییری وجود ندارد'
   },
   restaurantService: {
-    changesNotAllowed: 'امکان این تغییر بعد از تکمیل اعتبارسنجی وجود ندارد'
+    changesNotAllowed: 'امکان این تغییر بعد از تکمیل اعتبارسنجی وجود ندارد',
+    noSuchRestaurant: "رستوران مورد نظر وجود ندارد"
+  },
+  orderService: {
+    invalidState: 'امکان این تغییر وضعیت  وجود ندارد'
   }
 }
 

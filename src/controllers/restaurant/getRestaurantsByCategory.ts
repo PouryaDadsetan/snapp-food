@@ -4,7 +4,7 @@ import { Request, Response } from 'express'
 import { handleRequest } from '../helper'
 import restaurantService from "../../db/models/restaurant/restaurant.service"
 
-const getRestaurants = async (req: Request, res: Response) => {
+const getRestaurantsByCategory = async (req: Request, res: Response) => {
 
   const queryValidationSchema = yup.object().shape({
     limit: yup.string(),
@@ -32,4 +32,4 @@ const getRestaurants = async (req: Request, res: Response) => {
 	return handleRequest({ req, res, queryValidationSchema, handle })
 }
 
-export default getRestaurants
+export default getRestaurantsByCategory

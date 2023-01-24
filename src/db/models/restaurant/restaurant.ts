@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema, ObjectId as objectId } from "mongoose"
 const ObjectId = mongoose.Types.ObjectId
 
-interface IRestaurant extends Document {
+export interface IRestaurant extends Document {
   name: string
   city: string
   address: string
