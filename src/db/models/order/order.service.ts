@@ -142,8 +142,9 @@ const getOrder = async (orderId: string, ownerId: objectId): Promise<IResponse> 
     // Check for ownership
     const admin = await Admin.findById(ownerId).exec()
     const user = await User.findById(ownerId).exec()
+    
     if(admin) {
-      if(admin._id !== restaurant?.admin) {
+      if(admin._id.toString() !== restaurant?.admin.toString()) {
         return {
           success: false,
           error: {
@@ -153,7 +154,7 @@ const getOrder = async (orderId: string, ownerId: objectId): Promise<IResponse> 
         }
       }
     } else if(user) {
-      if(user._id !== order.user) {
+      if(user._id.toString() !== order.user.toString()) {
         return {
           success: false,
           error: {
@@ -327,10 +328,9 @@ const getOrdersOfCurrentUser = async (
 const updateOrderState = async (orderId: string, adminId: objectId, newState: string): Promise<IResponse> => {
   try {
     // Make sure the admin exists
-    const admin = await Admin.findById(adminId)
-      .populate('restaurant')
-    .exec()
-    if(!admin) {
+    const restaurant = await Restaurant.findOne({ admin: adminId }).exec()
+
+    if(!restaurant) {
       return {
         success: false,
         error: {
@@ -339,7 +339,6 @@ const updateOrderState = async (orderId: string, adminId: objectId, newState: st
         }
       }
     }
-    const { restaurant } = admin as IAdmin & { restaurant: IRestaurant }
 
     // Check existence and ownership of the order
     const order = await Order.findOne({ _id: orderId, restaurant: restaurant._id })
@@ -413,25 +412,8 @@ const rateOrder = async (
     }[]
   ): Promise<IResponse> => {
   try {
-
-    // Make sure the user exists
-    const user = await User.findById(userId).exec()
-    if(!user) {
-      return {
-        success: false,
-        error: {
-          statusCode: statusCodes.forbidden,
-          message: errorMessages.shared.permissionsRequired
-        }
-      }
-    }
-
     // Check existence and ownership of the order
-    const order = await Order.findOne({ _id: orderId, user: user._id })
-      .populate('restaurant')
-    .exec()
-    const restaurant = await Restaurant.findById(order?.restaurant).exec()
-
+    const order = await Order.findOne({ _id: orderId, user: userId }).exec()
     if(!order) {
       return {
         success: false,
@@ -441,6 +423,8 @@ const rateOrder = async (
         }
       }
     }
+
+    const restaurant = await Restaurant.findById(order?.restaurant).exec()
 
     // Apply the ratings
     // For foods
@@ -455,7 +439,7 @@ const rateOrder = async (
         validRatings.push(rating.rating)
         const food = await Food.findById(rating.food).exec()
         if(food) {
-          const newRating = (food.rating * food.ratingsCount + rating.rating) / food.ratingsCount + 1
+          const newRating = (food.rating * food.ratingsCount + rating.rating) / (food.ratingsCount + 1)
           await Food.findByIdAndUpdate(rating.food, { rating: newRating, ratingsCount: food.ratingsCount + 1 }, { new: true}).exec()
         }
       }
@@ -470,6 +454,8 @@ const rateOrder = async (
       const newRating = (restaurant.rating*restaurant.ratingsCount + total) / newRatingsCount
       await Restaurant.findByIdAndUpdate(restaurant._id, { rating: newRating, ratingsCount: newRatingsCount }, { new: true }).exec()
     }
+
+    await Order.findByIdAndUpdate(orderId, { isRated: true }).exec()
 
     return {
       success: true

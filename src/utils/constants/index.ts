@@ -55,3 +55,5 @@ export const errorMessages = {
 }
 
 export const categories = ['ایرانی', 'فست فود']
+
+export const orderStates = ['preparing', 'delivering', 'delivered', 'canceled']

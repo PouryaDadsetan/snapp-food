@@ -294,6 +294,16 @@ adminOrderRouter.get('/:orderId', auth('admin'), getOrder)
  *         description: The ID of the expected order
  *         schema:
  *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               newState:
+ *                 type: string
+ *                 oneOf: ['preparing', 'delivering', 'delivered', 'canceled']
  *     responses:
  *       200:
  *         description: Updated order
