@@ -357,11 +357,11 @@ const updateOrderState = async (orderId: string, adminId: objectId, newState: st
     
 
     // Check if the state update is valid
-    const validStates: { [key: string]: string[] } = {
-      preparing : ['delivering'],
-      delivering : ['delivered', 'canceled'],
-      delivered : [],
-      canceled : []
+    const validStates: { [key: string]: string[] } = { // TODO: fix this states later
+      preparing : ['preparing', 'delivering', 'delivered', 'canceled'],
+      delivering : ['preparing', 'delivering', 'delivered', 'canceled'],
+      delivered : ['preparing', 'delivering', 'delivered', 'canceled'],
+      canceled : ['preparing', 'delivering', 'delivered', 'canceled']
     }
     
     const currentState = order.state

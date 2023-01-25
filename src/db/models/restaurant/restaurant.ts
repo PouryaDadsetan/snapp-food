@@ -66,7 +66,7 @@ const restaurantSchema = new Schema<IRestaurant>({
   isVerified: {
     type: Boolean,
     required: true,
-    default: false
+    default: true // TODO: set this field to false later
   }
 }, { 
   timestamps: true
